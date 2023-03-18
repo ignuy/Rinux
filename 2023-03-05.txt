@@ -1,0 +1,93 @@
+- 리눅스
+ 1) Server (CUI, TUI)
+ 2) desktop (데스크탑 GUI)
+ - 멀티유저, 
+/etc (프로그램 설정)
+/home (사용자 파일, FTP, SSH, 환경설정 파일)
+/var    (로그, MySQL, DB)
+/usr    (사용자가 설치한 애플리케이션, 명령어)
+/root  (커널)
+
+# useradd (사용자 추가)
+ # strings /usr/sbin/useradd
+ 1) /home 에 폴더를 생성한다.  (사용자 명으로 생성, 숨김파일이 있다.)
+  /etc/skel 정리   
+  - /etc/skel  파일을 /home/계정명에 복사해준다.
+  - # echo "Test Skel" > /etc/skel/README  (사용자 추가시 README도 복사 된다.)
+ 팁 : 실행(바이너리 파일, 컴파일된 파일, 텍스트를 확인하는 cat 을 이용 볼수 없다.)
+  - # cp -r /etc/skel /etc/skel2   (수동으로 skel을 선택시 사용)
+  예) 사용자 웹서버 운영시 
+   # mkdir /etc/skel2/public_html  (웹서버 기본 디렉토리 public_html)
+   # echo "My Homepage" > /etc/skel2/public_html/index.html
+     - index.htm, index.html, index.php, index.asp  (index. 로 시작하는 것은 웹 기본 문서이다.)
+     - 사이트에 접속하여 index 기본분서를 찾고 없으면 오류가 발생한다.(또는 리다이렉션 된다.)
+   # useradd -k /etc/skel2 test3 -m   ( skel 사용자 생성시 기본적으로 파일, 폴더를 추가할 수 있다.)
+
+[root@localhost test3]# useradd test4
+[root@localhost test3]# useradd -k /etc/skel2 -m test    (각각 홈디렉토리 파일 확인)
+
+useraadd -D  설명
+# useraadd -D   (기본 값 출력, # cat /etc/default/useradd)
+- 기본 값은 -D 와 옵션을 조합해서 변경 가능하다. (예, 사용자홈 변경하여 생성)
+- 실습
+1) # mkdir /home2
+2) # useradd -D -b /home2
+3) # useradd -D   (기본 값 확인)
+HOME=/home2
+4) # ls /
+5) # useradd test6 ( /home2 에 사용자가 추가된다.)
+
+패스워드 변경
+# passwd 사용자명(계정명)
+ - 자기자신의 패스워드 변경시 passwd 만 입력
+ - 타인 변경은 (root만 가능)
+
+사용자 제거
+# userdel 계정명 (root로)
+ - 기본적으로 사용자 관련 파일은 삭제하지 않는다.
+# userdel -r 계정명 (-r 사용자 관련 파일을 삭제 해준다.)
+userdel 계정명 으로 삭제시 사용자의 중요 파일,디렉토리가 삭제되는것을 방지할 수 있다.
+
+참고 파일들(사용자 추가시 생성되는 파일 디렉토리)
+# useradd test1
+1) /etc/passwd 
+ - # grep test1 /etc/passwd
+    test1:x:1001:1001::/home/test1:/bin/bash   
+   (사용자ID:x는shadow사용 패스워드 관리:UID:GID:코멘트(정보):홈디렉토리:쉘)
+2) /etc/shadow
+ test1:$y$j9T$Hd23md0p63qM50gERlXq8.$rhzuxG5RBUz.:19421:0:99999:7:::
+3) /etc/group
+    test1:x:1001:      (그룹이름:x:GID)
+  (기본 그룹에 다른 사용자 추가)
+  # usermod -a -G test1 roror
+  결과 값 : test1:x:1001:roror,test2   (test1 그룹에 roror,test2 추가)
+4) /home/계정명   (기본 : /etc/skel 을 복사한다.)
+5) /var/spool/mail/   (메일)
+
+# ls -l ./passwd
+-rw-r--r--. 1 root root 2092  3월  5 16:07 ./passwd
+rwx, rwx, rwx  (9자리)
+user, group,other  (u,g,o)
+사용자,그룹,타인(그외,다은사용자)
+r 은 읽기, w는 쓰기, x는 실행
+r 은 4, w는 2, x는 1      (합 7)
+  rw-r--r--   사용자는 읽고 쓰기가 가능하고 그룹과 타인은 읽기만 가능하다.
+  퍼미션 값은 : 644이다
+
+# ls -ld ./test
+drwxr-xr-x. 2 root root 6  3월  5 16:37 ./test
+- test 디렉토리는 소유자는 root 그룹소유자도 root이며 퍼미션(권한)은 755(rwx r-x r-x)이다.
+  소유자 root는 읽고,쓰고,실행 가능 그룹,타인은 읽고,실행만 가능하다.
+
+파일, 디렉토리 기본 값(default)
+디렉토리 : 777 
+파일 : 666   (111, 실행 권한이 제거)
+
+umask(개발자,,,) , umask 002   --->  초기에 파일, 디렉토리 생성시 권한(값)
+umask 값과 666을 XOR 연산을 하면 생성된 파일의 권한을 알 수있다.
+umask 값과 777을 XOR 연산을 하면 생성된 디렉토리의 권한을 알 수 있다.
+- XOR은 입력된 값이 같으면 0, 입력된 값이 다르면 1을 출력
+
+파일의 기본값 666  ->  110 110 110 -> 110 110 110 
+umask 값은    002  ->  000 000 010 ~  111 111 101
+기보값 & umask = 110 110 100

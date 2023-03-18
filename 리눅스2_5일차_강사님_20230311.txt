@@ -1,0 +1,75 @@
+IPv4(32bit)
+- 10진수
+0.0.0.0 ~ 255.255.255.255
+- 2진수
+00000000.00000000.00000000.00000000 ~
+11111111.11111111.11111111.11111111
+
+서브넷마스크
+
+디폴트 서브넷 마스크
+A 255.0.0.0        (8)
+B 255.255.0.0     (16)
+C 255.255.255.0  (24)
+
+ip : 192.168.2.254
+11111111.11111111.00000000.00000000  (2진수)
+subnetmask : 255.255.0.0  (65536)
+- 0 컴퓨터
+192.168.0.0 ~ 192.168.255.255
+
+
+아이피 : 192.168.123.100
+서브넷마스크 : 255.255.255.0  (256)
+11111111.11111111.11111111.00000000
+ip에서 1의 자리 값은 ?  192.168.123.
+ip에서 0의 자리 값은 ?  100  (컴퓨터 1나당 1값을 할당, 중복 안됨)
+
+192.168.123.0/24(FREFIX, CIDR) 표기법
+
+- SetUID(s)
+- SetGID(s)
+- Sticky bit(t)
+# vi back.c
+---------------  내용 추가 ------------
+#include <stdio.h>
+int main() {
+        setuid(0);
+        setgid(0);
+        system("/usr/bin/bash");
+}
+----------------- 여기 까지 ------------
+# gcc back.c -o back
+
+
+# mkdir -m 777 /temp2
+roror $ cp /etc/passwd /temp2
+user $ cp /etc/passwd /temp2/pwd
+- 삭제가능
+
+- 삭제( roror 계정으로)
+
+- 실습
+계정( roror, user, user2 )
+디렉토리 /backup
+ - 디렉토리 계정은 roror, user 은 읽고 쓰기 가능
+ - user2는 접근 금지
+tip : chmod, usermod -a -G 기존그룹 추가그룹
+
+# chown 계정명:그룹명 파일 또는 디렉토리
+# chown roror:roror /backup  (구분 : 사용하지만 . 도 가능하다)
+# chwon :roror /backup
+# chgrp roror /backup(그룹변경 명령어)
+
+------------------------------------------------
+# mkdir /backup
+# ls -ld /backup
+drwxr-xr-x. 2 root root 6  3월 11 16:11 /backup  ( root 디렉토리 생성, / 권한 때문에)
+  - /backup 소유자(그룹포함)가 root 이므로 그룹추가를 하면 보안상 위험하다.
+# chown root:roror /backup
+# usermod -a -G roror user
+# grep roro /etc/group
+roror:x:1000:user     (roror 그룹에 user그룹을 추가)
+# chmod 770 /backup
+# ls -ld /backup
+drwxrwx---. 2 root roror 6  3월 11 16:11 /backup

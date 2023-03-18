@@ -1,0 +1,308 @@
+#2023-03-12===============================
+<Tip> ctrl + shift + l : 한장 넘기기
+<Tip> /etc/rc.d 알아두는게 좋다.
+
+runlevel (6가지)
+- # /etc/rc.d/rc.local (부팅시 실행하고 싶은 명령어 입력)
+
+Redhat 7, Ubuntu(22.10)
+Redhat 9 (  /etc/rc.d ----> systemd) 
+- 9버전부터는  /etc/rc.d 가 systemd 로 바뀜
+
+- 하드링크 / 심볼릭 링크
+# ln -s (심볼릭) - 파일,폴더
+# ln -s /var/log log
+- /root/log = /var/log
+
+
+
+/etc/rc.d/rcX.d (리눅스가 부팅시 읽어 들이는 파일)
+- K 중지, S 실행
+
+/etc/rc.d/init.d
+
+1) # /etc/init.d/network restart (전체시스템에 가능)
+2) # systemctl restart network (CentOS 6,7 , Ubuntu 16.)
+3) # systemctl restart network (CentOS, Ubuntu)
+- 1,2,3 번은 똑같은 기능
+[root@localhost init.d]# systemctl list-unit-files | grep enable
+
+# ln    (하드링크) - 파일
+
+# ip -o -4 a (랜카드의 이름) == ip addr show
+
+1. 방화벽(firewalld)
+2. selinux(접근통제, DAC, MAC) - 저장장치
+ - DAC : ID기반
+ - MAC : 객체, 주체, (세부적 권한)
+
+# vi /etc/sysconfig/selinux
+22번째줄 SELINUX=disabled 수정
+# getenforce (Enforcing 활성화)
+# reboot
+- 셀리눅스를 사용하면 아주 좋지만, 실습에서는 어렵다.
+   우선은 해제하여 사용하고 나중에 학습 ~
+- 주소 설정은 정상(프로그램)적이나 프로그램이 실행이 안되는 증상이 생김.
+
+3. IP 설정(Rocky,CentOS)
+# nmcli c modify ens160 ipv4.addresses 192.168.123.200/24
+# nmcli c modify ens160 ipv4.gateway 192.168.123.1
+# nmcli c modify ens160 ipv4.dns 8.8.8.8,8.8.4.4
+# nmcli c modify ens160 ipv4.method manual
+# nmcli c down ens160;nmcli c up ens160
+- ens160(랜카드 명칭, 192.168.123.200 --> CentOS 192.168.123.222/24)
+- CentOS  -->  ens33
+
+4. SSH, FTP
+1) SSH(22)
+- Redhat는 SSH 기본적으로 설치되어 있다.
+  # systemctl start sshd.service
+
+- kali 기본으로 실행되어 있지 않다.
+  # systemctl start ssh.service  (ssh 설치되어 있다!)
+  # systemctl enable ssh.service(재부팅후에 자동으로 실행)
+
+2) FTP(21) --> 파일전송프로토콜
+- ProFTPD, vsFTPD 서버 프로그램이 있다.
+
+3) vsFTPD 설치 및 설정
+# dnf install vsftpd -y (프로그램 설치)
+# rpm -qa | grep vsftpd (설치확인)
+# rpm -ql vsftpd-3.0.3-49.el9.x86_64 | grep etc (파일 위치 확인)
+ - 리눅스에서 환경설정 파일은 .conf로 되어있다.
+# vi /etc/vsftpd/vsftpd.conf
+# firewall-cmd --list-all
+ - 방화벽 중지 및 해제
+# firewall-cmd --permanent --add-service=ftp
+ 포트오픈 : firewall-cmd --permanent --add-port=21/tcp (참고)
+# firewall-cmd --reload
+- vsFTPD 환경설정(옵션) 확인
+# cat /etc/vsftpd/vsftpd.conf | grep -Ev "^$|^#"  (공백,주석 제외 출력)
+# systemctl enable --now vsftpd  (아래 두개의 명령을 한줄로 해결)
+ - systemctl start vsftpd.service  
+ - systemctl enable vsftpd.service
+# ps -ef | grep vsftpd  (프로세스 확인)
+
+--------------- apache 설치(https://apache.org/)-------------------------
+# dnf install httpd* -y
+# cd /var/www/html
+# firewall-cmd --permanent --add-service=http
+# firewall-cmd --permanent --add-service=https
+# firewall-cmd --permanent --add-service=dns
+# firewall-cmd --reload
+# systemctl enable httpd (재부팅시 자동실행)
+# systemctl start httpd (실행)
+- systemctl enable --now httpd (한방에 해결)
+
+기본문서 : index.html(htm,php)
+
+-------------------------------------------------------------
+192.168.2.0/16 
+
+
+192.168.0.0/24
+
+192.168.2.222 <- 강사님 자리 ip
+
+------------------------------------------------------------
+ipconfig
+192.168.2.207/16 (강의실 자리 ip주소; 내 자리에서 바로 물려준다는 생각)
+
+[root@localhost roror]# nmcli c modify ens160 ipv4.addresses 192.168.2.207/16
+[root@localhost roror]# nmcli c modify ens160 ipv4.gateway 192.168.0.1
+[root@localhost roror]# nmcli c modify ens160 ipv4.method manual
+[root@localhost roror]# nmcli c modify ens160 ipv4.dns 8.8.8.8,8.8.4.4
+[root@localhost roror]# nmcli c down ens160
+'ens160' 연결이 성공적으로 비활성화되었습니다 (D-Bus 활성 경로: /org/freedesktop/NetworkManager/ActiveConnection/1)
+[root@localhost roror]# nmcliu c up ens160
+bash: nmcliu: command not found...
+Similar command is: 'nmcli'
+[root@localhost roror]# nmcli c up ens160
+연결이 성공적으로 활성화되었습니다 (D-버스 활성 경로: /org/freedesktop/NetworkManager/ActiveConnection/2)
+[root@localhost roror]# ping -c 1 8.8.8.8
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=110 time=42.3 ms
+
+--- 8.8.8.8 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 42.318/42.318/42.318/0.000 ms
+
+
+
+
+---------------------------------
+[Rocky Linux]
+
+[root@localhost roror]# cd /etc
+[root@localhost etc]# ls /
+afs     bin   dev  home  lib64  mnt  proc  run   srv  temp   tmp  var
+backup  boot  etc  lib   media  opt  root  sbin  sys  temp2  usr
+[root@localhost etc]# cd rc.d/
+[root@localhost rc.d]# pwd
+/etc/rc.d
+[root@localhost rc.d]# ls
+init.d  rc.local
+[root@localhost rc.d]# cd init.d
+[root@localhost init.d]# ls
+README
+[root@localhost init.d]# ls
+README
+[root@localhost init.d]# cd ..
+[root@localhost rc.d]# cd ..
+[root@localhost etc]# ls -ld
+drwxr-xr-x. 130 root root 8192  3월 11 17:09 .
+[root@localhost etc]# ls -ld rc*
+drwxr-xr-x. 3 root root 36  3월  5 15:39 rc.d
+lrwxrwxrwx. 1 root root 13 11월 15 19:18 rc.local -> rc.d/rc.local
+[root@localhost etc]# runlevel
+N 5
+
+- 심볼릭
+[root@localhost ~]# ln -s /var/log log
+[root@localhost ~]# ls -l
+합계 4
+-rw-------. 1 root root 818  3월  5 15:44 anaconda-ks.cfg
+lrwxrwxrwx. 1 root root   8  3월 12 14:35 log -> /var/log
+[root@localhost ~]# cd log
+[root@localhost log]# cd ..
+[root@localhost ~]# ls
+anaconda-ks.cfg  log
+
+
+[root@localhost ~]# ln /etc/passwd ./pwd
+[root@localhost ~]# ln /etc/passwd ./pwd2
+[root@localhost ~]# ln /etc/passwd ./pwd3
+[root@localhost ~]# ln /etc/passwd ./pwd4
+[root@localhost ~]# ls -l
+합계 20
+-rw-------. 1 root root  818  3월  5 15:44 anaconda-ks.cfg
+lrwxrwxrwx. 1 root root    8  3월 12 14:35 log -> /var/log
+-rw-r--r--. 5 root root 2172  3월 11 16:24 pwd
+-rw-r--r--. 5 root root 2172  3월 11 16:24 pwd2
+-rw-r--r--. 5 root root 2172  3월 11 16:24 pwd3
+-rw-r--r--. 5 root root 2172  3월 11 16:24 pwd4
+
+[root@localhost ~]# stat pwd5
+  File: pwd5
+  Size: 2131      	Blocks: 8          IO Block: 4096   일반 파일
+Device: fd00h/64768d	Inode: 67398462    Links: 4
+Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)
+Context: system_u:object_r:passwd_file_t:s0
+Access: 2023-03-12 15:01:10.381572155 +0900
+Modify: 2023-03-12 14:49:45.102954404 +0900
+Change: 2023-03-12 15:01:02.906021585 +0900
+ Birth: 2023-03-12 14:49:45.102954404 +0900
+[root@localhost ~]# ls -i
+35178482 anaconda-ks.cfg  67398462 pwd   67398446 pwd3  67398462 pwd5
+33671916 log              67398462 pwd2  67398446 pwd4
+[root@localhost ~]# ls -li /etc/passwd ./pwd5
+67398462 -rw-r--r--. 4 root root 2131  3월 12 14:49 ./pwd5
+67398462 -rw-r--r--. 4 root root 2131  3월 12 14:49 /etc/passwd
+
+[root@localhost ~]# ls -li /etc/passwd ./pwd*
+67398462 -rw-r--r--. 4 root root 2131  3월 12 14:49 ./pwd
+67398462 -rw-r--r--. 4 root root 2131  3월 12 14:49 ./pwd2
+67398446 -rw-r--r--. 2 root root 2172  3월 11 16:24 ./pwd3
+67398446 -rw-r--r--. 2 root root 2172  3월 11 16:24 ./pwd4
+67398462 -rw-r--r--. 4 root root 2131  3월 12 14:49 ./pwd5
+67398462 -rw-r--r--. 4 root root 2131  3월 12 14:49 /etc/passwd
+
+[root@localhost roror]# nmcli c modify ens160 ipv4.addresses 192.168.123.200/24
+[root@localhost roror]# nmcli c modify ens160 ipv4.gateway 192.168.123.1
+[root@localhost roror]# nmcli c modify ens160 ipv4.dns 8.8.8.8,8.8.4.4
+[root@localhost roror]# nmcli c modify ens160 ipv4.method manual
+[root@localhost roror]# nmcli c modify ens160;nmcli c up ens160
+오류: <설정>.<속성> 인수가 누락되었습니다.
+연결이 성공적으로 활성화되었습니다 (D-버스 활성 경로: /org/freedesktop/NetworkManager/ActiveConnection/2)
+[root@localhost roror]# nmcli c
+NAME    UUID                                  TYPE      DEVICE 
+ens160  dc029a8d-be86-36ff-93a1-1c04f7a692b0  ethernet  ens160 
+[root@localhost roror]# nmcli c down ens160;nmcli c up ens160
+'ens160' 연결이 성공적으로 비활성화되었습니다 (D-Bus 활성 경로: /org/freedesktop/NetworkManager/ActiveConnection/2)
+연결이 성공적으로 활성화되었습니다 (D-버스 활성 경로: /org/freedesktop/NetworkManager/ActiveConnection/3)
+
+[root@localhost roror]# ping -c 1 8.8.8.8
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+From 192.168.123.200 icmp_seq=1 Destination Host Unreachable
+
+--- 8.8.8.8 ping statistics ---
+1 packets transmitted, 0 received, +1 errors, 100% packet loss, time 0ms
+
+
+[root@localhost roror]# cd /etc/sysconfig
+[root@localhost sysconfig]# vi /etc/sysconfig/selinux
+
+
+
+------------------------------------------
+[CentOS 7]
+
+[roror@localhost ~]$ su
+암호:
+[root@localhost roror]# cd rc3.d
+bash: cd: rc3.d: 그런 파일이나 디렉터리가 없습니다
+[root@localhost roror]# ls
+공개  다운로드  문서  바탕화면  비디오  사진  서식  음악
+[root@localhost roror]# cd rc.d
+bash: cd: rc.d: 그런 파일이나 디렉터리가 없습니다
+[root@localhost roror]# cd /etc
+[root@localhost etc]# cd rc.d/
+[root@localhost rc.d]# ls
+init.d  rc.local  rc0.d  rc1.d  rc2.d  rc3.d  rc4.d  rc5.d  rc6.d
+[root@localhost rc.d]# cd rc3.d
+[root@localhost rc3.d]# ls
+K50netconsole  S10network
+[root@localhost rc3.d]# cat /etc
+
+[root@localhost rc3.d]# cd /home/roror
+[root@localhost roror]# cd /etc/init.d
+[root@localhost init.d]# ls
+README  functions  netconsole  network
+
+
+[root@localhost init.d]# systemctl list-unit-files | grep enable
+[root@localhost init.d]# systemctl list-unit-files | grep enable | grep ssh
+
+
+[root@localhost roror]# nmcli c modify ens33 ipv4.addresses 192.168.123.222/24
+[root@localhost roror]# nmcli c modify ens33 ipv4.gateway 192.168.123.1
+[root@localhost roror]# nmcli c modify ens33 ipv4.dns 8.8.8.8,8.8.4.4
+[root@localhost roror]# nmcli c modify ens33 ipv4.method manual
+[root@localhost roror]# nmcli c down ens33;
+연결 'ens33'이(가) 성공적으로 비활성화되었습니다(D-Bus 활성 경로: /org/freedesktop/NetworkManager/ActiveConnection/5).
+[root@localhost roror]# nmcli c up ens33
+연결이 성공적으로 활성화되었습니다 (D-Bus 활성 경로: /org/freedesktop/NetworkManager/ActiveConnection/6)
+
+
+------------------------------------------------------------
+
+Kali
+
+┌──(kali㉿kali)-[~]
+└─$ sudo -s
+[sudo] password for kali: 
+┌──(root㉿kali)-[/home/kali]
+└─# ps -ef | grep ssh
+kali        1060     999  0 01:39 ?        00:00:00 /usr/bin/ssh-agent x-session-manager
+root        8729    8598  0 03:08 pts/1    00:00:00 grep --color=auto ssh
+
+                                                                             
+┌──(root㉿kali)-[/home/kali]
+└─# systemctl start ssh
+                                                                             
+┌──(root㉿kali)-[/home/kali]
+└─# systemctl enable ssh.service
+Synchronizing state of ssh.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable ssh
+Created symlink /etc/systemd/system/sshd.service → /lib/systemd/system/ssh.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/ssh.service → /lib/systemd/system/ssh.service.
+                                                                             
+┌──(root㉿kali)-[/home/kali]
+└─# ps -ef | grep ssh
+kali        1060     999  0 01:39 ?        00:00:00 /usr/bin/ssh-agent x-session-manager
+root        9264       1  0 03:10 ?        00:00:00 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
+root        9575    8598  0 03:11 pts/1    00:00:00 grep --color=auto ssh
+
+
+
+
