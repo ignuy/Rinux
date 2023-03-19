@@ -1,0 +1,106 @@
+APM(Apache PHP MySQL) - APMsetup.exe
+- apache (HTTP 프로토콜을 사용)
+1) # dnf install httpd* 
+2) # systemctl disable --now firewalld (방화벽 비활성화)
+ - HTTP : 80포트
+3) # systemctl start httpd (웹서버 시작)
+4) # systemctl enable httpd (재부팅 자동 시작)
+5) # ps -ef | grep httpd (httpd 구동, 메모리에 매핑 확인)
+ - /var/www 기본 디렉토리
+ - /var/www/html  (HTML 파일을 복사)
+6) # cp ./home.zip /var/www/html (HTML 소스파일 복사)
+   # cd /var/www/html
+   # unzip home.zip
+ - http://roror.co.kr  (절대경로, 상대경로)
+ - /var/www/html
+ - /var/www/html/images/img1.png    http://roror.co.kr/images/img1.png
+
+-  Mariadb 설치
+1) # dnf upgrade --refresh -y   (운영체제 업데이트)
+2) # curl -LsS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash -s -- --mariadb-server-version=10.6 --skip-maxscale --skip-tools (원격리포지터리 주소 다운)
+3) # dnf install mariadb-server mariadb -y
+4) # vi /etc/my.cnf.d/charset.cnf
+[mysqld]
+character-set-server = utf8mb4 
+[client]
+default-character-set = utf8mb4
+5) # systemctl start mariadb
+6) # systemctl enable mariadb
+7) # mariadb-secure-installation (mariadb 초기화, 이전 버전 명령어 mysqldb_secure_installation)
+ - 패스워드 넣고 무조건 yes 하자, (No 할필요 없다.) 
+로그인 하는 방법(# mysql)
+방법 1 : $ mysql -u DB계정명 -p
+방법 2 : $ mysql -u DB계정명 -p'qhdks12'
+방법 3 : $ mysql -u DB계정명 -p'qhdks12' mysql
+
+- 데이터베이스 테스트(실습)
+# mysql
+> show databases;  (데이터베이스 출력)
+> create database gnuboard;
+> use gnuboard;  (gnuboard 이동)
+> show tables;   (테이블 목록 출력)
+> create table test_db (id int, name varchar(50), address varchar(50));
+> desc test_db;
+> insert into test_db (id, name, address)values(1,"Rocky Linux","http://Rocky");
+> select * from test_db;
+> drop database gnuboard;
+
+-------  PHP 설치 및 설정 --------
+# dnf install php*
+# vi /etc/php.ini  
+short_open_tag = On 로 설정 
+ - short_open_tag    -->    <?php    ?>   --->   <?   ?>
+ - <? ?> 사용하기 위해 설정
+# systemctl restart php
+# systemctl restart php-fpm
+----------------  PHP 테스트 -----------------
+# vi /var/www/html/info.php
+<? phpinfo(); ?>
+
+<html>
+<head><title></title></head>
+<body>
+<? phpinfo(); 
+for(){
+ i=+1
+}
+?>
+</body>
+</html>
+---------------   gnuboard 그누보드 설치 -----------------
+1. Source 다운로드 (https://sir.kr)
+ 파일설명 : tar (묶는 명령어),  gz는 압축 프로그램
+ 압축 해제 방법 : # tar xvfz 파일이름  (tar tvfz 파일이름, 내용 확인)
+2) - 그누보드를 설치할 디렉토리 생성
+mkdir /var/www/html/gnuboard
+mkdir /var/www/html/gnuboard/data
+chmod 707 /var/www/html/gnuboard/data
+- 위의 3줄을 아래처럼 한줄로
+# mkdir -p -m 707 /var/www/html/gnuboard/data
+3) # tar xvfz gnuboard5.5.8.2.7.tar.gz -C /var/www/html/gnuboard
+4) # cd /var/www/html/gnuboard
+
+- 리눅스에서 APM기반 프로그램 설치시
+  database 이름, db 사용자, db 패스워드, 호스트주소
+# mysql
+> create database gnuboard;
+ - 데이터베이스 생성
+> grant all privileges on gnuboard.* to roror@localhost identified by 'qhdks12';
+ - 데이터베이스, 테이블 권한 설정 및 사용자 추가
+ - gnuboard.*   gnuboard의 모든 테이블
+ - roror 은 사용자, qhdks12 패스워드가 된다.
+ - 데이터베이스명 : gnuboard, 아이디 : roror, 패스워드 : qhdks12, 호스트명 : localhost
+> flush privileges;
+ 
+
+$ sudo  apt install fonts-nanum* -y 
+
+- wordpress
+1. 다운로드(https://ko.wordpress.org/releases/)
+  # tar xvfz wordpress-6.1.1-ko_KR.tar.gz -C /var/www/html
+2. Database
+# mysql
+> create database wordpress;
+> grant all privileges on wordpress.* to roror@localhost identified by 'qhdks12';
+> flush privileges;
+3. http://192.168.123.200/wordpress

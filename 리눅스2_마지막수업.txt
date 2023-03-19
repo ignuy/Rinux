@@ -1,0 +1,537 @@
+#2023-03-19===============================
+[roror@localhost ~]$ su
+암호:
+[root@localhost roror]# ls
+cls       html        ls          permi  test1  다운로드  바탕화면  사진  음악
+daum.png  index.html  naver.html  test   공개   문서      비디오    서식
+[root@localhost roror]# cd /var/named
+[root@localhost named]# ls -l
+합계 20
+drwxrwx--- 2 named named   23  3월 18 16:48 data
+drwxrwx--- 2 named named   60  3월 18 16:48 dynamic
+-rw-r----- 1 root  named 2253 11월 15 18:00 named.ca
+-rw-r----- 1 root  named  152 11월 15 18:00 named.empty
+-rw-r----- 1 root  named  152 11월 15 18:00 named.localhost
+-rw-r----- 1 root  named  168 11월 15 18:00 named.loopback
+-rw-r----- 1 root  named  237  3월 18 16:46 roror.co.kr.zone
+drwxrwx--- 2 named named    6 11월 15 18:00 slaves
+[root@localhost named]# ls
+data  dynamic  named.ca  named.empty  named.localhost  named.loopback  roror.co.kr.zone  slaves
+[root@localhost named]# nslookup ftp.roror.co.kr 192.168.123.200
+;; connection timed out; no servers could be reached
+
+
+[root@localhost named]# ifconfig
+ens160: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.123.200  netmask 255.255.255.0  broadcast 192.168.123.255
+        inet6 fe80::20c:29ff:fe56:460f  prefixlen 64  scopeid 0x20<link>
+        ether 00:0c:29:56:46:0f  txqueuelen 1000  (Ethernet)
+        RX packets 77396  bytes 74065050 (70.6 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 42812  bytes 4430618 (4.2 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 6181  bytes 816469 (797.3 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 6181  bytes 816469 (797.3 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+[root@localhost named]# ps -ef | grep named
+named      40944       1  0 13:10 ?        00:00:00 /usr/sbin/named -u named -c /etc/named.conf
+root       42490   42333  0 14:11 pts/0    00:00:00 grep --color=auto named
+[root@localhost named]# systemctl start named
+[root@localhost named]# systemctl enable named
+Created symlink /etc/systemd/system/multi-user.target.wants/named.service → /usr/lib/systemd/system/named.service.
+[root@localhost named]# nslookup ftp.roror.co.kr 192.168.123.200
+;; connection timed out; no servers could be reached
+
+
+[root@localhost named]# ifconfig
+ens160: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.123.200  netmask 255.255.255.0  broadcast 192.168.123.255
+        inet6 fe80::20c:29ff:fe56:460f  prefixlen 64  scopeid 0x20<link>
+        ether 00:0c:29:56:46:0f  txqueuelen 1000  (Ethernet)
+        RX packets 77404  bytes 74065742 (70.6 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 42820  bytes 4431242 (4.2 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 6189  bytes 816997 (797.8 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 6189  bytes 816997 (797.8 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+[root@localhost named]# ps -ef | grep named
+named      40944       1  0 13:10 ?        00:00:00 /usr/sbin/named -u named -c /etc/named.conf
+root       42555   42333  0 14:12 pts/0    00:00:00 grep --color=auto named
+[root@localhost named]# dig roror.co.kr
+
+; <<>> DiG 9.16.23-RH <<>> roror.co.kr
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 52861
+;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512
+;; QUESTION SECTION:
+;roror.co.kr.			IN	A
+
+;; AUTHORITY SECTION:
+co.kr.			863	IN	SOA	g.dns.kr. domain-manager.nic.or.kr. 2303190601 3600 900 604800 900
+
+;; Query time: 44 msec
+;; SERVER: 8.8.8.8#53(8.8.8.8)
+;; WHEN: Sun Mar 19 14:12:15 KST 2023
+;; MSG SIZE  rcvd: 104
+
+[root@localhost named]# dig @localhost roror.co.kr
+
+; <<>> DiG 9.16.23-RH <<>> @localhost roror.co.kr
+; (2 servers found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 46045
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: e6de81d3e395f78401000000641699b74aecd26c6facdb66 (good)
+;; QUESTION SECTION:
+;roror.co.kr.			IN	A
+
+;; ANSWER SECTION:
+roror.co.kr.		86400	IN	A	192.168.123.200
+
+;; Query time: 2 msec
+;; SERVER: ::1#53(::1)
+;; WHEN: Sun Mar 19 14:12:23 KST 2023
+;; MSG SIZE  rcvd: 84
+
+[root@localhost named]# nslookup ftp.roror.co.kr 192.168.123.200
+^C
+[root@localhost named]# nslookup roror.co.kr 192.168.123.200
+^C
+[root@localhost named]# firewall-cmd --list-all
+public (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: ens160
+  sources: 
+  services: cockpit dhcpv6-client dns ftp http https ssh
+  ports: 
+  protocols: 
+  forward: yes
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+[root@localhost named]# 
+[root@localhost named]# 
+[root@localhost named]# 
+[root@localhost named]# 
+[root@localhost named]# ls
+data  dynamic  named.ca  named.empty  named.localhost  named.loopback  roror.co.kr.zone  slaves
+[root@localhost named]# 
+[root@localhost named]# 
+[root@localhost named]# ls -l
+합계 20
+drwxrwx--- 2 named named   23  3월 18 16:48 data
+drwxrwx--- 2 named named   60  3월 18 16:48 dynamic
+-rw-r----- 1 root  named 2253 11월 15 18:00 named.ca
+-rw-r----- 1 root  named  152 11월 15 18:00 named.empty
+-rw-r----- 1 root  named  152 11월 15 18:00 named.localhost
+-rw-r----- 1 root  named  168 11월 15 18:00 named.loopback
+-rw-r----- 1 root  named  237  3월 18 16:46 roror.co.kr.zone
+drwxrwx--- 2 named named    6 11월 15 18:00 slaves
+[root@localhost named]# vi roror.co.kr.zone 
+[root@localhost named]# cat /etc/resolv.conf 
+# Generated by NetworkManager
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+[root@localhost named]# nslookup roror.co.kr 192.168.123.200
+^C
+[root@localhost named]# getenforce
+Disabled
+[root@localhost named]# dig @192.168.123.200 roror.co.kr
+^C[root@localhost named]# ifconfig
+ens160: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.123.200  netmask 255.255.255.0  broadcast 192.168.123.255
+        inet6 fe80::20c:29ff:fe56:460f  prefixlen 64  scopeid 0x20<link>
+        ether 00:0c:29:56:46:0f  txqueuelen 1000  (Ethernet)
+        RX packets 77416  bytes 74066836 (70.6 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 42832  bytes 4432182 (4.2 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 6215  bytes 818603 (799.4 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 6215  bytes 818603 (799.4 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+[root@localhost named]# route -r
+route: 부적절한 옵션 -- 'r'
+Usage: route [-nNvee] [-FC] [<AF>]           List kernel routing tables
+       route [-v] [-FC] {add|del|flush} ...  Modify routing table for AF.
+
+       route {-h|--help} [<AF>]              Detailed usage syntax for specified AF.
+       route {-V|--version}                  Display version/author and exit.
+
+        -v, --verbose            be verbose
+        -n, --numeric            don't resolve names
+        -e, --extend             display other/more information
+        -F, --fib                display Forwarding Information Base (default)
+        -C, --cache              display routing cache instead of FIB
+
+  <AF>=Use -4, -6, '-A <af>' or '--<af>'; default: inet
+  List of possible address families (which support routing):
+    inet (DARPA Internet) inet6 (IPv6) ax25 (AMPR AX.25) 
+    netrom (AMPR NET/ROM) ipx (Novell IPX) ddp (Appletalk DDP) 
+    x25 (CCITT X.25) 
+[root@localhost named]# route -n
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         192.168.123.1   0.0.0.0         UG    100    0        0 ens160
+192.168.123.0   0.0.0.0         255.255.255.0   U     100    0        0 ens160
+[root@localhost named]# cd /etc/NetworkManager/
+[root@localhost NetworkManager]# ls
+NetworkManager.conf  conf.d  dispatcher.d  dnsmasq-shared.d  dnsmasq.d  system-connections
+[root@localhost NetworkManager]# 
+[root@localhost NetworkManager]# 
+[root@localhost NetworkManager]# cd system-connections/
+[root@localhost system-connections]# ls
+ens160.nmconnection
+[root@localhost system-connections]# vi ens160.nmconnection 
+[root@localhost system-connections]# ping 8.8.8.8
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=128 time=42.3 ms
+^C
+--- 8.8.8.8 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 42.289/42.289/42.289/0.000 ms
+[root@localhost system-connections]# ls
+ens160.nmconnection
+[root@localhost system-connections]# 
+[root@localhost system-connections]# 
+[root@localhost system-connections]# ls
+ens160.nmconnection
+[root@localhost system-connections]# 
+[root@localhost system-connections]# 
+[root@localhost system-connections]# vi ens160.nmconnection
+[root@localhost system-connections]# ls
+ens160.nmconnection
+[root@localhost system-connections]# 
+[root@localhost system-connections]# 
+[root@localhost system-connections]# systemctl restart naemd
+Failed to restart naemd.service: Unit naemd.service not found.
+[root@localhost system-connections]# systemctl restart named
+[root@localhost system-connections]# dig @192.168.123.200 roror.co.kr
+
+; <<>> DiG 9.16.23-RH <<>> @192.168.123.200 roror.co.kr
+; (1 server found)
+;; global options: +cmd
+;; connection timed out; no servers could be reached
+
+[root@localhost system-connections]# firewall-cmd --lsit-all
+usage: see firewall-cmd man page
+firewall-cmd: error: unrecognized arguments: --lsit-all
+[root@localhost system-connections]# firewall-cmd --lsit-all
+usage: see firewall-cmd man page
+firewall-cmd: error: unrecognized arguments: --lsit-all
+[root@localhost system-connections]# firewall-cmd --list-all
+public (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: ens160
+  sources: 
+  services: cockpit dhcpv6-client dns ftp http https ssh
+  ports: 
+  protocols: 
+  forward: yes
+  masquerade: no
+  forward-ports: 
+  source-ports: 
+  icmp-blocks: 
+  rich rules: 
+[root@localhost system-connections]# 
+[root@localhost system-connections]# systemctl restart NetworkManager
+[root@localhost system-connections]# systemctl stop firewalld
+[root@localhost system-connections]# dig @192.168.123.200 roror.co.kr
+
+; <<>> DiG 9.16.23-RH <<>> @192.168.123.200 roror.co.kr
+; (1 server found)
+;; global options: +cmd
+;; connection timed out; no servers could be reached
+
+[root@localhost system-connections]# vi /etc/hosts
+[root@localhost system-connections]# 
+
+
+
+[root@localhost roror]# ls
+cls       html        naver.html  test1     문서      사진
+daum.png  index.html  permi       공개      바탕화면  서식
+home.zip  ls          test        다운로드  비디오    음악
+[root@localhost roror]# cp ./home.zip /var/www/html
+[root@localhost roror]# cd /var/www/html
+[root@localhost html]# ls
+home.zip
+
+
+
+==========================================
+<Kali>
+
+┌──(kali㉿kali)-[~]
+└─$ sudo -s                   
+[sudo] password for kali: 
+┌──(root㉿kali)-[/home/kali]
+└─# apt update
+Reading package lists... Done
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 20293 (apt)
+N: Be aware that removing the lock file is not a solution and may break your system.
+E: Unable to lock directory /var/lib/apt/lists/
+                                                                                                             
+┌──(root㉿kali)-[/home/kali]
+└─# apt update       
+Reading package lists... Done
+E: Could not get lock /var/lib/apt/lists/lock. It is held by process 20293 (apt)
+N: Be aware that removing the lock file is not a solution and may break your system.
+E: Unable to lock directory /var/lib/apt/lists/
+                                                                                                             
+┌──(root㉿kali)-[/home/kali]
+└─# ping 8.8.8.8     
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=128 time=42.1 ms
+^C
+--- 8.8.8.8 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 42.117/42.117/42.117/0.000 ms
+                                                                                                             
+┌──(root㉿kali)-[/home/kali]
+└─# apt install filezilla
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Package filezilla is not available, but is referred to by another package.
+This may mean that the package is missing, has been obsoleted, or
+is only available from another source
+
+E: Package 'filezilla' has no installation candidate
+                                                                                                             
+┌──(root㉿kali)-[/home/kali]
+└─# cd Desktop 
+                                                                                                             
+┌──(root㉿kali)-[/home/kali/Desktop]
+└─# ls
+home.zip
+                                                                                                             
+┌──(root㉿kali)-[/home/kali/Desktop]
+└─# scp ./home.zip roror@192.168.123.200:/home/roror
+The authenticity of host '192.168.123.200 (192.168.123.200)' can't be established.
+ED25519 key fingerprint is SHA256:pUF6KSZPsE2KaUWxeCFHXcC2CMR6V5Nhc4f1dUXwxdc.
+This key is not known by any other names
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '192.168.123.200' (ED25519) to the list of known hosts.
+roror@192.168.123.200's password: 
+Permission denied, please try again.
+roror@192.168.123.200's password: 
+home.zip                                                                   100%  251KB  50.7MB/s   00:00    
+                                                                                                             
+┌──(root㉿kali)-[~kali/Desktop]
+└─# 
+
+===========================================
+
+# df
+# du
+
+DNS -> 53 port ->
+
+--------------------------------
+
+APM(Apache PHP MySQL) - APMsetup.exe
+- apache (HTTP 프로토콜을 사용)
+1) # dnf install httpd*
+2) # systemctl disable --now firewalld (방화벽 비활성화)
+- HTTP : 80port
+3) # systemctl start httpd (웹서버 시작)
+4) # systemctl enable httpd (재부팅시 자동시작)
+5) # ps -ef | grep httpd (httpd 에 구동 ,메모리에 매핑 확인)
+- /var/www 기본 디렉토리
+- /var/www/html (HTML 파일을 복사)
+6) # cp ./home.zip /var/www/html (HTML 소스파일 복사) 
+# cd /var/www/html
+# unzip home.zip
+- http://roror.co.kr (절대경로)
+- /var/www/html
+- /var/www/html/images/img1.png http://roror.co.kr/images/img1.png
+
+
+
+-  Mariadb 설치
+* https://mariadb.com/kb/en/mariadb-package-repository-setup-and-usage/
+
+1) # dnf upgrade --refresh -y (운영체제 업데이트)
+2) # curl -LsS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash -s -- --mariadb-server-version=10.6 --skip-maxscale --skip-tools
+(원격리포지토리 주소 다운)
+
+3) # dnf install mariadb-server mariadb -y
+4) # vi /etc/my.cnf.d/charset.cnf
+[mysqld]
+character-set-server = utf8mb4 
+[client]
+default-character-set = utf8mb4
+
+5) # systemctl start mariadb
+6) # systemctl enable mariadb
+7) # mariadb-secure-installation 
+(mariadb 초기화,이전버전 - mysqldb_secure_installation)
+ - 패스워드 넣고 읽어보고 대부분 yes 하면 된다.
+(No 할필요가 없다, 추후에 수정가능)
+
+* 로그인 하는 방법(# mysql)
+방법 1) $ mysql -u DB계정명 -p
+방법 2) $ mysql -u DB계정명 -p'qhdks12' 
+방법 3) $ mysql -u DB계정명 -p'qhdks12' mysql
+
+- 데이터 베이스 테스트(실습)
+# mysql
+MariaDB [(none)]> show database;
+MariaDB [(none)]> create database gnuboard;
+MariaDB [(none)]> use gnuboard; (gnuboard 이동)
+MariaDB [(none)]> show tables; (테이블 목록 출력)
+
+> create table test_db (id int, name varchar(50), address varchar(50));
+> desc test_db;
+> insert into test_db (id, name, address)values(1,"Rocky Linux","http://Rocky");
+> select * from test_db;
+> drop database gnuboard;
+
+--------------------------------------------
+* PHP 설치 및 설정
+<Tip> php 는 제일 마지막에
+
+[root@localhost roror]# dnf module list php
+[root@localhost roror]# dnf install php*
+# vi /etc/php.ini
+short_open_tag --> <?php ?> --> <?    ?>
+<? ?> 사용하기 위해 설정
+
+
+# systemctl restart php
+# systemctl restart php-fpm 
+# vi /var/www/html/info.php
+- <? phpinfo(); ?>
+- <?php phpinfo(); ?>
+
+
+-------  PHP 설치 및 설정 --------
+# dnf install php*
+# vi /etc/php.ini  
+short_open_tag = On 로 설정 (198 페이지 쯤)
+ - short_open_tag    -->    <?php    ?>   --->   <?   ?>
+ - <? ?> 사용하기 위해 설정
+# systemctl restart php
+# systemctl restart php-fpm
+---------  PHP 테스트 ---------
+# vi /var/www/html/info.php
+<? phpinfo(); ?>
+
+
+<html>
+<head><title></title></head>
+<body>
+<? phpinfo(); 
+for(){
+ i=+1
+}
+?>
+</body>
+</html>
+--------------- gnuboard 그누보드 설치 -------------
+
+1) Source 다운로드 (sir.kr)
+파일설명 : tar (묶는 명령어), gz 는 압축 프로그램
+압축해제방법 : # tar xvfz 파일이름 (tar tvfz 파일이름, 내용 확인)
+2) - 그누보드를 설치할 디렉토리 생성
+mkdir /var/www/html/gnuboard
+mkdir /var/www/html/gnuboard/data
+chmod 707 /var/www/html/gnuboard/data
+- 위의 3줄을 아래처럼 한줄로
+# mkdir -p -m 707 /var/www/html/gnuboard/data
+
+3)# tar xvfz gnuboard5.5.8.2.7.tar.gz -C /var/www/html/gnuboard
+4) # cd/var/www/html/gnuboard
+
+* 리눅스에서 APM기반 프로그램 설치시
+database 이름, db 사용자,db 패스워드, 호스트주소
+
+# mysql
+> create database gnuboard;
+- 데이터베이스 생성
+
+> grant all privileges on gnuboard.* to roror@localhost identified by 'qhdks12';
+- 데이터베이스, 테이블 권한 설정 및 사용자 추가
+- gnuboard.* gnuboard의 모든 테이블
+- roror 은 사용자, qhdks12 패스워드가 된다.
+- 데이터베이스명 : gnuboard
+  아이디 : roror
+  패스워드 : qhdks12
+  호스트명 : localhost
+
+> flush privileges;
+- 변경사항을 저장해서 다시 사용할수 있도록함
+  (패스워드 변경 및 생성)
+
+
+┌──(kali㉿kali)-[~]
+└─$ sudo apt install fonts-nanum* -y
+
+
+
+[root@localhost gnuboard]# ls
+LICENSE.txt  css                install           skin
+README.md    data               js                tail.php
+_common.php  extend             lib               tail.sub.php
+_head.php    g4_import.php      mobile            theme
+_tail.php    g4_import_run.php  orderupgrade.php  version.php
+adm          head.php           perms.sh          yc4_import.php
+bbs          head.sub.php       plugin            yc4_import_run.php
+common.php   img                shop
+config.php   index.php          shop.config.php
+[root@localhost gnuboard]# vi index.php
+[root@localhost gnuboard]# vi _common.php
+[root@localhost gnuboard]# vi ./common.php
+
+
+
+
+[root@localhost html]# vi /etc/httpd/conf/httpd.conf
+168 <IfModule dir_module>
+169     DirectoryIndex index.php index.html
+170 </IfModule>
+
+html 앞에 php 를 두면 그누보드가 먼저 실행된다.
+(192.168.123.200 으로 들어갈시)
+
+
+
+
+
+
+
+
